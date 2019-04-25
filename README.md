@@ -36,3 +36,17 @@ Download Hugging Face's large neural coref model https://github.com/huggingface/
 
 Comment out the `wget` `CustomCommand` from setup.py this way the neural coreference libary will be installed locally.
 
+### Docker installation
+
+
+```bash
+docker build -t minimal-coref .
+docker run -it -m 10GB --oom-kill-disable -v /Users/chris/coref_barebones/:/coref_barebones/ -v /Users/chris/.gcp/:/.gcp/ -v /Users/chris/.config:/root/.config/ minimal-coref:latest /bin/bash
+source /coref_barebones/.env
+```
+
+
+With dataflow image
+```bash
+docker run -it -m 10GB --oom-kill-disable -v /Users/chris/coref_barebones/:/coref_barebones/ -v /Users/chris/.gcp/:/.gcp/ -v /Users/chris/.config:/root/.config/ --entrypoint /bin/bash minimal-coref:latest 
+```

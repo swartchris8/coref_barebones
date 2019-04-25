@@ -63,7 +63,9 @@ class build(_build):  # pylint: disable=invalid-name
 # The output of custom commands (including failures) will be logged in the
 # worker-startup log.
 CUSTOM_COMMANDS = [
-    ['wget', 'https://github.com/huggingface/neuralcoref-models/releases/download/en_coref_lg-3.0.0/en_coref_lg-3.0.0.tar.gz'],
+    ['apt-get', 'update'],
+    ['apt-get', '--assume-yes', 'install', 'libxml2-dev'],
+    ['gsutil', 'cp', 'gs://healx-spacy-ner-bio/en_coref_lg-3.0.0.tar.gz', '.'],
     ['pip', 'install', 'en_coref_lg-3.0.0.tar.gz'],
 ]
 
@@ -78,19 +80,17 @@ class CustomCommands(setuptools.Command):
         pass
 
     def RunCustomCommand(self, command_list):
-        print
-        'Running command: %s' % command_list
+        print("Running command: {}".format(command_list))
         p = subprocess.Popen(
             command_list,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         # Can use communicate(input='y\n'.encode()) if the command run requires
         # some confirmation.
         stdout_data, stdout_err = p.communicate()
-        print
-        'Command output: %s | Command err: %s' % (stdout_data, stdout_err)
+        print("Command output: {} | Command err: {}".format(stdout_data, stdout_err))
         if p.returncode != 0:
             raise RuntimeError(
-                'Command %s failed: exit code: %s' % (command_list, p.returncode))
+                "Command {} failed: exit code: {}".format(command_list, p.returncode))
 
     def run(self):
         for command in CUSTOM_COMMANDS:
@@ -102,15 +102,33 @@ class CustomCommands(setuptools.Command):
 # so this dependency will not trigger anything to be installed unless a version
 # restriction is specified.
 REQUIRED_PACKAGES = [
-    'apache-beam[gcp]==2.4.0',
-    'spacy==2.0.12',
+    'apache-beam==2.4.0',
+    'spacy==2.0.13',
+    'requests==2.18.4',
+    'unidecode==1.0.22',
+    'tqdm==4.23.3',
+    'lxml==4.2.1',
+    'python-dateutil==2.7.3',
+    'textblob==0.15.1',
+    'networkx==2.1',
+    'flashtext==2.7',
+    'annoy==1.12.0',
     'ujson==1.35',
+    'repoze.lru==0.7',
+    'Whoosh==2.7.4',
+    'python-Levenshtein==0.12.0',
+    'fuzzywuzzy==0.16.0',
+    'attrs==19.1.0',
+    'scikit-learn==0.19.1',# preinstalled in dataflow
+    'pandas==0.23.0',# preinstalled in dataflow
+    'scipy==1.1.0',# preinstalled in dataflow
+
 ]
 
 setuptools.setup(
     name='entityextraction',
     version='0.0.1',
-    description='ETL to extract neural coref entities',
+    description='Beam pipeline to extract neuralcoref entities',
     install_requires=REQUIRED_PACKAGES,
     packages=setuptools.find_packages(),
     cmdclass={
